@@ -1,6 +1,6 @@
 import SwiftUI
 
-private enum FocusedField {
+enum FocusedField {
     case email
     case password
 }
@@ -32,12 +32,38 @@ struct CTAButtonModifier: ViewModifier {
     }
 }
 
+struct LoginTextInputModifier<T>: ViewModifier where T: Hashable {
+    private let isEnabled: Bool
+    private var focused: FocusState<T>.Binding
+    private let focusedState: T
+    
+    init(isEnabled: Bool, focused: FocusState<T>.Binding, focusedState: T) {
+        self.isEnabled = isEnabled
+        self.focused = focused
+        self.focusedState = focusedState
+    }
+    
+    func body(content: Content) -> some View {
+        content
+            .disabled(!isEnabled)
+            .font(.body)
+            .focused(focused, equals: focusedState)
+            .padding(EdgeInsets(top: 12, leading: 7, bottom: 12, trailing: 7))
+            .border(.gray, width: 1)
+            .cornerRadius(8)
+    }
+}
+
 struct LoginView: View {
     
-    @FocusState private var focused: FocusedField?
-    @State private var email: String = ""
-    @State private var canTypePassword = false
-    @State private var password: String = ""
+    @FocusState
+    private var focused: FocusedField?
+    @State
+    private var email: String = ""
+    @State
+    private var canTypePassword = false
+    @State
+    private var password: String = ""
     
     var body: some View {
         
@@ -54,20 +80,18 @@ struct LoginView: View {
                                 .font(.caption)
                         }
                         TextField("E-mail", text: $email)
-                            .disabled(canTypePassword)
-                            .font(.body)
-                            .focused($focused, equals: .email)
-                            .padding(EdgeInsets(top: 12, leading: 7, bottom: 12, trailing: 7))
-                            .border(.gray, width: 1)
-                            .cornerRadius(8)
+                            .modifier(LoginTextInputModifier(isEnabled: canTypePassword,
+                                                             focused: $focused,
+                                                             focusedState: .email))
                     }
                     if canTypePassword {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("password")
                                 .font(.caption)
                             TextField("password", text: $password)
-                                .font(.body)
-                                .focused($focused, equals: .password)
+                                .modifier(LoginTextInputModifier(isEnabled: true,
+                                                                 focused: $focused,
+                                                                 focusedState: .password))
                         }
                     }
                     
