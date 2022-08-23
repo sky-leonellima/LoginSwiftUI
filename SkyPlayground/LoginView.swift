@@ -100,7 +100,7 @@ struct LoginView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Password")
                                     .font(.caption)
-                                TextField("Password", text: $password)
+                                SecureField("Password", text: $password)
                                     .textContentType(.password)
                                     .modifier(LoginTextInputModifier(isEnabled: true,
                                                                      focused: $focused,
