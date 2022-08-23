@@ -42,6 +42,7 @@ struct LoginTextInputModifier<T>: ViewModifier where T: Hashable {
             .focused(focused, equals: focusedState)
             .padding(EdgeInsets(top: 12, leading: 7, bottom: 12, trailing: 7))
             .modifier(BorderedView(cornerRadius: 4, width: isEnabled ? 1 : 0))
+//            .textFieldStyle(RoundedBorderTextFieldStyle())
     }
 }
 
