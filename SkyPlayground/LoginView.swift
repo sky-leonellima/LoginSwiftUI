@@ -10,7 +10,7 @@ struct CTAButtonModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .font(.system(size: 14, weight: .medium))
-            .padding([.top, .bottom], 8)
+            .padding([.top, .bottom], 16)
             .padding([.leading, .trailing], 12)
             .frame(maxWidth: .infinity)
             .foregroundColor(isEnabled ? .black : Color("disabled-text"))
@@ -41,24 +41,24 @@ struct LoginTextInputModifier<T>: ViewModifier where T: Hashable {
             .font(.system(size: 14, weight: .bold))
             .focused(focused, equals: focusedState)
             .padding(EdgeInsets(top: 12, leading: 7, bottom: 12, trailing: 7))
-            .overlay(RoundedRectangle(cornerRadius: 4,
-                                      style: .continuous)
-                .stroke(.gray, lineWidth: isEnabled ? 1 : 0))
+            .modifier(BorderedView(cornerRadius: 4, width: isEnabled ? 1 : 0))
     }
 }
 
 struct BorderedView: ViewModifier {
     private let cornerRadius: CGFloat
     private let width: CGFloat
+    private let color: Color
     
-    init(cornerRadius: CGFloat, width: CGFloat) {
+    init(cornerRadius: CGFloat, width: CGFloat, color: Color = .gray) {
         self.cornerRadius = cornerRadius
         self.width = width
+        self.color = color
     }
     func body(content: Content) -> some View {
         content.overlay(RoundedRectangle(cornerRadius: cornerRadius,
                                          style: .continuous)
-            .stroke(.gray, lineWidth: width))
+            .stroke(color, lineWidth: width))
     }
 }
 
@@ -78,45 +78,48 @@ struct LoginView: View {
     var body: some View {
         
         ZStack {
-            
             Color.black.ignoresSafeArea()
             Image("peacock-login")
-            
-            Group {
-                VStack(alignment: .center, spacing: 24) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        if canTypePassword {
-                            Text("Email")
-                                .font(.caption)
-                        }
-                        TextField("Email", text: $email)
-                            .modifier(LoginTextInputModifier(isEnabled: !canTypePassword,
-                                                             focused: $focused,
-                                                             focusedState: .email))
-                    }
-                    if canTypePassword {
+            VStack(alignment: .leading, spacing: 48) {
+                Text("First, enter your email")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.white)
+                Group {
+                    VStack(alignment: .center, spacing: 24) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Password")
-                                .font(.caption)
-                            TextField("Password", text: $password)
-                                .textContentType(.password)
-                                .modifier(LoginTextInputModifier(isEnabled: true,
+                            if canTypePassword {
+                                Text("Email")
+                                    .font(.caption)
+                            }
+                            TextField("Email", text: $email)
+                                .modifier(LoginTextInputModifier(isEnabled: !canTypePassword,
                                                                  focused: $focused,
-                                                                 focusedState: .password))
+                                                                 focusedState: .email))
                         }
+                        if canTypePassword {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Password")
+                                    .font(.caption)
+                                TextField("Password", text: $password)
+                                    .textContentType(.password)
+                                    .modifier(LoginTextInputModifier(isEnabled: true,
+                                                                     focused: $focused,
+                                                                     focusedState: .password))
+                            }
+                        }
+                        
+                        Button(action: onLoginPressed) {
+                            Text(verbatim: "Continue")
+                                .modifier(CTAButtonModifier())
+                        }.disabled(!hasValidEmail(email: email))
                     }
-                    
-                    Button(action: onLoginPressed) {
-                        Text(verbatim: "Continue")
-                            .modifier(CTAButtonModifier())
-                    }.disabled(!hasValidEmail(email: email))
+                    .padding([.leading, .trailing], 32)
+                    .padding([.top, .bottom], 24)
+                    .background(.white)
                 }
-                .padding([.leading, .trailing], 32)
-                .padding([.top, .bottom], 24)
-                .background(.white)
+                .background(ignoresSafeAreaEdges: [.leading, .trailing])
+                .cornerRadius(8)
             }
-            .background(ignoresSafeAreaEdges: [.leading, .trailing])
-            .cornerRadius(8)
             .padding([.leading, .trailing], 24)
         }
         .onTapGesture(perform: removeFocus)
